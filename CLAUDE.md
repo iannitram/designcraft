@@ -39,3 +39,13 @@ People trust DesignCraft with their layouts; a crash loses their work. **This ou
 
 ## Roadmap
 `ROADMAP.md` (committed) is the one-page summary: stage, headline numbers, dimensions, languages, progress log. It follows craftrules' [`standards/progress-docs.md`](https://github.com/storytold/craftrules/blob/main/standards/progress-docs.md). Details: `docs/target-app-parity.md` (assessment), `docs/gaps.md` (ranked work list: pick from the top), `docs/roadmap.md` (milestones, current focus), `docs/parity-checklist.md` (presence checklist, `cargo xtask parity`), and the typography, file-format, UI, hardware and localization parity docs in `docs/`. When work lands, update the affected docs and their status lines, delete or shrink the closed gap, and add a progress-log line to ROADMAP.md.
+
+## Agent skills
+
+### Issue tracker
+
+Reports are markdown files in the Software Depot's `apps/<App>/reports/`, not GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
