@@ -1,6 +1,6 @@
 # DesignCraft code map (our fork)
 
-Ours, not upstream's. Built 2026-10-26 from the Cargo workspace (`crates/*`, `apps/*`, `xtask`) and each crate's `Cargo.toml` description; line counts are Rust lines on `main` that day. Upstream's own architecture notes: [`docs/architecture.md`](architecture.md) where present, and `AGENTS.md`. When a crate is added or split, update this table.
+Ours, not upstream's. Built 2026-10-26 and re-checked against `main` that night (no crate added, removed or merged since; the 18 crates, 3 apps and xtask below are the whole workspace) from the Cargo workspace (`crates/*`, `apps/*`, `xtask`) and each crate's `Cargo.toml` description; line counts are Rust lines on `main` that day. Upstream's own architecture notes: [`docs/architecture.md`](architecture.md) where present, and `AGENTS.md`. When a crate is added or split, update this table.
 
 ## Crates
 
