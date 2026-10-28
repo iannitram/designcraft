@@ -1,6 +1,8 @@
 # DesignCraft code map (our fork)
 
-Ours, not upstream's. Built 2026-10-26 and re-checked against `main` that night (no crate added, removed or merged since; the 18 crates, 3 apps and xtask below are the whole workspace) from the Cargo workspace (`crates/*`, `apps/*`, `xtask`) and each crate's `Cargo.toml` description; line counts are Rust lines on `main` that day. Upstream's own architecture notes: [`docs/architecture.md`](architecture.md) where present, and `AGENTS.md`. When a crate is added or split, update this table.
+Ours, not upstream's. Audited 2026-10-28 against `main`: each row below was checked against the Cargo workspace (`crates/*`, `apps/*`, `xtask`) and that crate's `Cargo.toml` (description and internal dependencies, dev-dependencies included). Sizes are Rust lines in tracked `.rs` files at that commit. The 17 crates, 3 apps and `xtask` below are the whole workspace. Upstream's own architecture notes: [`docs/architecture.md`](architecture.md) where present, and `AGENTS.md`. When a crate is added or split, update this table.
+
+Describes commit: f0c4a700 (2026-10-28)
 
 ## Crates
 
@@ -9,7 +11,7 @@ Ours, not upstream's. Built 2026-10-26 and re-checked against `main` that night 
 | `crates/color` | DesignCraft color | — | 1 file(s) with per-OS or wasm code | ~3,264 |
 | `crates/compose` | DesignCraft text composition: paragraph composer (Knuth–Plass), hyphenation, justification, columns, threading, wrap | `color`, `doc`, `fonts`, `geom` | portable | ~22,575 |
 | `crates/doc` | DesignCraft document model: spreads, pages, parents, layers, frames, stories, styles, swatches | `color`, `geom` | 2 file(s) with per-OS or wasm code | ~16,414 |
-| `crates/engine` | DesignCraft engine: session, documents, history, selection, command registry, tool hosting | `color`, `compose`, `doc`, `epub`, `fonts`, `format`, `geom`, `idml`, `images`, `pdf`, `pptx`, `render`, `textimport`, `tools` | 25 file(s) with per-OS or wasm code | ~67,041 |
+| `crates/engine` | DesignCraft engine: session, documents, history, selection, command registry, tool hosting | `color`, `compose`, `doc`, `epub`, `fonts`, `format`, `geom`, `idml`, `images`, `pdf`, `pptx`, `render`, `textimport`, `tools` | 26 file(s) with per-OS or wasm code | ~67,041 |
 | `crates/epub` | DesignCraft EPUB 3 (reflowable) export: stories in reading order, CSS from styles, images | `color`, `doc` | portable | ~2,763 |
 | `crates/fonts` | DesignCraft fonts: font database (bundled OFL + system), metrics, glyph outlines, shaping | — | 5 file(s) with per-OS or wasm code | ~5,344 |
 | `crates/format` | DesignCraft native file format: zip with document.json and embedded assets; versioned | `doc`, `images` | portable | ~1,142 |
@@ -50,9 +52,21 @@ The engine owns the session, undo and the command registry; every user action is
 - `tools` is used by `engine`, `mcp`, `ui-egui`.
 - `ui-egui` is used by `designcraft`, `designcraft-web`.
 
+## Upstream and our delta
+
+Every crate, app and the `xtask` here is upstream's (`storytold/designcraft`). Our delta on top is documentation only: `PIPELINE.md`, `SPEC.md`, `CHANGELOG.md`, `AGENTS.fork.md`, this map, `docs/agents/`, and ten lines in `CLAUDE.md` (agent-skills config); `git diff --stat upstream/main...main` shows no source file. Upstream commits daily, so a day or two of its work is not on `main` until the daily sync merges it (on 2026-10-28 the crate set was identical on both).
+
+## Outside the workspace
+
+In this repo but outside the Cargo workspace: `assets/` (app icons, fonts, hyphenation data and ICC profiles), `packaging/` (per-OS release packaging: `linux`, `macos`, `windows`, `freebsd`, `web`), `nix/` and `flake.nix`, `contributors/`, `licenses/`.
+
+Not here at all: shared code that comes in as git dependencies pinned by revision, so a change to it is a change in another repository: the `craft-*` crates (`craft-pdf`, `craft-keymap`, `craft-prepress`, `craft-update`, `craft-cms`, `craft-print`, `craft-ui`, `craft-window`, `craft-atomic`, `craft-docpath`, the `hayro` PDF readers and `krilla`) from `storytold/craft-libs`, `indd` from `storytold/indd-utils`, and forks of egui, eframe and winit (`storytold/egui`, `storytold/winit`).
+
+`Cargo.toml` lists `designcraft-testkit` (`crates/testkit`) in `[workspace.dependencies]`, but that crate does not exist on `main` and nothing depends on it: there is no test-helper crate here, so do not add `designcraft-testkit` to a `Cargo.toml` expecting it to resolve.
+
 ## Mac, PC and Linux (R04)
 
-- Ships for macOS, Windows and Linux (plus FreeBSD and the web) from upstream's release workflow.
-- Per-OS code sits mostly in the engine, the `ui-egui` front end and the desktop app (the "Platforms" column counts files with `cfg(target_os…)`, `cfg(windows|unix)` or wasm code). Everything else is portable Rust.
-- Upstream CI (`ci.yml`) calls `storytold/craft-common-actions` `gate.yml` with its default `os` input, `["ubuntu-24.04"]`: pull requests are tested on Linux only. Release, FreeBSD, Nix and Windows ARM64 have their own workflows.
+- Packaging for macOS, Windows, Linux, FreeBSD and the web is in `packaging/`. `release.yml` (push to `release`) calls the shared release workflow in `storytold/craft-common-actions`.
+- Per-OS code sits mostly in the engine, the `ui-egui` front end and the desktop app (the "Platforms" column counts files with `cfg(target_os…)`, `cfg(windows|unix)`, `cfg(target_family…)` or wasm code). Everything else is portable Rust.
+- CI: `ci.yml` (every pull request and push to main) calls `storytold/craft-common-actions` `gate.yml` with its default `os` input, `["ubuntu-24.04"]`: pull requests are tested on Linux only (#16 adds Windows and macOS). The other workflows: `freebsd.yml`, `nix.yml`, `packaging-lint.yml`, `windows-arm64.yml` (builds the ARM64 package and smoke-tests it on a native ARM runner), `sonarcloud.yml` and `release.yml`.
 - A build issue that touches per-OS code carries a `platform:*` label and says which OS it was built and checked on.
