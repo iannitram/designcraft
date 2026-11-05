@@ -656,6 +656,7 @@ fn thumbnail_refuses_an_output_that_names_the_input() {
     let doc = dir.join("a.designcraft");
     make_document(&doc);
     let saved = std::fs::read(&doc).unwrap();
+    #[cfg_attr(not(unix), allow(unused_mut))]
     let mut outs = vec![doc.clone(), dir.join(".").join("a.designcraft")];
     #[cfg(unix)]
     {
