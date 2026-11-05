@@ -872,7 +872,12 @@ fn the_paste_in_place_shortcut_pastes_in_place_and_plain_paste_offsets() {
         assert_ne!(pasted.0, id);
         st.doc.item(pasted).unwrap().bounds()
     };
-    let linux = egui::Modifiers { alt: true, ctrl: true, shift: true, mac_cmd: false, command: true };
+    // Paste in Place's default chord: ⌘⌥⇧V on a Mac, Ctrl+Alt+Shift+V elsewhere.
+    let linux = if cfg!(target_os = "macos") {
+        egui::Modifiers { alt: true, ctrl: false, shift: true, mac_cmd: true, command: true }
+    } else {
+        egui::Modifiers { alt: true, ctrl: true, shift: true, mac_cmd: false, command: true }
+    };
     assert_eq!(paste(&mut h, linux), original, "Paste in Place");
     let moved = paste(&mut h, egui::Modifiers::COMMAND);
     assert!((moved.x0 - original.x0 - 12.0).abs() < 1e-9 && (moved.y0 - original.y0 - 12.0).abs() < 1e-9, "{moved:?}");
