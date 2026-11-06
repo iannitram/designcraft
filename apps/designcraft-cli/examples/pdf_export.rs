@@ -34,6 +34,7 @@ fn main() -> Result<(), String> {
     // made with a link in it): the files written here are the benchmark's alone.
     let nanos = std::time::SystemTime::UNIX_EPOCH.elapsed().map_or(0, |d| d.as_nanos());
     let dir = std::env::temp_dir().join(format!("designcraft-pdf-bench-{}-{nanos}", std::process::id()));
+    #[cfg_attr(not(unix), allow(unused_mut))]
     let mut builder = std::fs::DirBuilder::new();
     #[cfg(unix)]
     {

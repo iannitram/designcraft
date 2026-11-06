@@ -3,6 +3,15 @@ use egui_kittest::{Harness, kittest::Queryable};
 
 use super::*;
 
+/// The Command key as egui-winit reports it: ⌘ on a Mac, Ctrl elsewhere.
+fn command_key() -> egui::Modifiers {
+    if cfg!(target_os = "macos") {
+        egui::Modifiers { mac_cmd: true, command: true, ..egui::Modifiers::NONE }
+    } else {
+        egui::Modifiers { ctrl: true, command: true, ..egui::Modifiers::NONE }
+    }
+}
+
 /// A place-cursor drag past its 3-point threshold but short of egui's drag distance previews
 /// a frame, and the release places that frame: what's shown is what lands.
 #[test]
@@ -662,7 +671,7 @@ fn spring_zoom_scrubs_and_owns_pointer_release_after_shortcut_release() {
     let z = app.view().unwrap().zoom;
     let doc = app.session.doc().unwrap().doc.clone();
     // Ctrl is the platform command modifier on Windows/Linux, using the same input path.
-    let cmd = egui::Modifiers { command: true, ctrl: true, ..egui::Modifiers::NONE };
+    let cmd = command_key();
     canvas_frame(&mut app, &ctx, cmd, vec![space_key(true, cmd), press(p, true, cmd)]);
     let end = p + vec2(150.0, 0.0);
     canvas_frame(&mut app, &ctx, cmd, vec![egui::Event::PointerMoved(end)]);
@@ -872,7 +881,12 @@ fn the_paste_in_place_shortcut_pastes_in_place_and_plain_paste_offsets() {
         assert_ne!(pasted.0, id);
         st.doc.item(pasted).unwrap().bounds()
     };
-    let linux = egui::Modifiers { alt: true, ctrl: true, shift: true, mac_cmd: false, command: true };
+    // Paste in Place's default chord: ⌘⌥⇧V on a Mac, Ctrl+Alt+Shift+V elsewhere.
+    let linux = if cfg!(target_os = "macos") {
+        egui::Modifiers { alt: true, ctrl: false, shift: true, mac_cmd: true, command: true }
+    } else {
+        egui::Modifiers { alt: true, ctrl: true, shift: true, mac_cmd: false, command: true }
+    };
     assert_eq!(paste(&mut h, linux), original, "Paste in Place");
     let moved = paste(&mut h, egui::Modifiers::COMMAND);
     assert!((moved.x0 - original.x0 - 12.0).abs() < 1e-9 && (moved.y0 - original.y0 - 12.0).abs() < 1e-9, "{moved:?}");
