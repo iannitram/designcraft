@@ -3,6 +3,15 @@ use egui_kittest::{Harness, kittest::Queryable};
 
 use super::*;
 
+/// The Command key as egui-winit reports it: ⌘ on a Mac, Ctrl elsewhere.
+fn command_key() -> egui::Modifiers {
+    if cfg!(target_os = "macos") {
+        egui::Modifiers { mac_cmd: true, command: true, ..egui::Modifiers::NONE }
+    } else {
+        egui::Modifiers { ctrl: true, command: true, ..egui::Modifiers::NONE }
+    }
+}
+
 /// A place-cursor drag past its 3-point threshold but short of egui's drag distance previews
 /// a frame, and the release places that frame: what's shown is what lands.
 #[test]
@@ -662,7 +671,7 @@ fn spring_zoom_scrubs_and_owns_pointer_release_after_shortcut_release() {
     let z = app.view().unwrap().zoom;
     let doc = app.session.doc().unwrap().doc.clone();
     // Ctrl is the platform command modifier on Windows/Linux, using the same input path.
-    let cmd = egui::Modifiers { command: true, ctrl: true, ..egui::Modifiers::NONE };
+    let cmd = command_key();
     canvas_frame(&mut app, &ctx, cmd, vec![space_key(true, cmd), press(p, true, cmd)]);
     let end = p + vec2(150.0, 0.0);
     canvas_frame(&mut app, &ctx, cmd, vec![egui::Event::PointerMoved(end)]);
