@@ -300,6 +300,7 @@ fn thumbnail(args: &[String]) -> Result<(), String> {
 
 /// Whether `out` is the file `input` names: the same path, a symlink to it or, on Unix, a hard
 /// link (the same device and inode). An `out` that doesn't exist yet can't be the input.
+#[cfg_attr(not(unix), allow(clippy::needless_bool))] // the Unix block sits between the two returns
 fn names_the_same_file(input: &std::path::Path, out: &std::path::Path) -> bool {
     let (Ok(a), Ok(b)) = (std::fs::canonicalize(input), std::fs::canonicalize(out)) else { return false };
     if a == b {
