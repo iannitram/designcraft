@@ -537,6 +537,14 @@ pub(crate) fn font_definitions(craft: &'static [designcraft_fonts::CraftFont], l
         let mut seen = std::collections::HashSet::new();
         fonts.families.insert(FontFamily::Name(family.into()), stack.filter(|n| seen.insert(n.clone())).collect());
     }
+    // The key glyphs macOS shortcut labels use (⇥ ⏎ ⎋ among them) are in neither the interface
+    // face nor the symbol faces: the mono face, already embedded, is every other family's last
+    // resort for them.
+    for stack in fonts.families.values_mut() {
+        if !stack.iter().any(|n| n == "mono") {
+            stack.push("mono".into());
+        }
+    }
     fonts
 }
 
@@ -628,6 +636,21 @@ mod japanese_font_tests {
                 assert!(fonts.has_glyph(&font, 'ד') && fonts.has_glyph(&font, 'क'), "missing supplied script in {font:?}");
                 let galley = fonts.layout_no_wrap("דक".into(), font, egui::Color32::WHITE);
                 assert!(galley.size().x > 0.0 && galley.rect.is_finite());
+            }
+        });
+    }
+
+    /// A macOS shortcut label (⇧⌘K, ⌥⇥, ⌃⎋) has a glyph in every UI family on every OS: the
+    /// Keyboard Shortcuts dialog draws these, and a missing glyph is tofu (a panic in tests).
+    #[test]
+    fn mac_key_symbols_have_glyphs_in_every_family() {
+        let ctx = ctx_with(&[]);
+        ctx.fonts_mut(|fonts| {
+            for family in families().into_iter().chain([egui::FontFamily::Name("arabic".into()), egui::FontFamily::Name("arabic-semibold".into())]) {
+                let font = egui::FontId::new(13.0, family);
+                for ch in "↑↓←→⇥⇧⌃⌘⌥⌦⌫⎋⏎".chars() {
+                    assert!(fonts.has_glyph(&font, ch), "missing {ch} (U+{:04X}) in {font:?}", u32::from(ch));
+                }
             }
         });
     }
